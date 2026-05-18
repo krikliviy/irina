@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Для Ируси ✨</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #0d0d0d;
+            --bg-warm: #141210;
+            --text-light: #f5f2eb;
+            --text-muted: #a69f95;
+            --accent-gold: #e5c158;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Film Grain & Canvas Overlay */
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        canvas#particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Sound Toggle Button */
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 10px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        .sound-toggle.visible { opacity: 1; }
+        .sound-toggle svg { width: 18px; height: 18px; fill: var(--text-light); transition: fill 0.3s; }
+        .sound-toggle.muted svg { fill: var(--text-muted); opacity: 0.5; }
+
+        /* General Layout */
+        section {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 24px;
+            z-index: 2;
+            overflow: hidden;
+            background: linear-gradient(to bottom, transparent, rgba(13,13,13,0.4));
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Typography styling */
+        h1, h2, h3, .serif-font {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 400;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1.2s cubic-bezier(0.215, 0.610, 0.355, 1), transform 1.2s cubic-bezier(0.215, 0.610, 0.355, 1);
+        }
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* SCREEN 1: LOADING */
+        #screen-loading {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease, visibility 1s;
+        }
+        .loading-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            text-align: center;
+            min-height: 40px;
+            padding: 0 20px;
+            transition: opacity 0.5s ease;
+        }
+
+        /* SCREEN 2: HERO */
+        #screen-hero {
+            background: radial-gradient(circle at 50% 40%, rgba(229, 193, 88, 0.05) 0%, transparent 70%), var(--bg-warm);
+            text-align: center;
+        }
+        .hero-title {
+            font-size: 2.2rem;
+            line-height: 1.3;
+            margin-bottom: 24px;
+            color: var(--text-light);
+        }
+        .hero-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            margin-bottom: 48px;
+            font-weight: 500;
+        }
+        .btn-cinematic {
+            background: var(--text-light);
+            color: var(--bg-dark);
+            border: none;
+            padding: 16px 36px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            font-weight: 500;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 4px 20px rgba(255,255,255,0.1);
+            text-transform: uppercase;
+        }
+        .btn-cinematic:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        /* SCREEN 3: DOSSIER (UPDATED) */
+        #screen-analysis { background: var(--bg-dark); }
+        .section-tag {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        .analysis-grid {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .analysis-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 24px 20px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.4s ease, border-color 0.4s ease;
+        }
+        .analysis-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            line-height: 1.4;
+            color: var(--text-light);
+        }
+        .analysis-value span.gold-highlight { 
+            color: var(--accent-gold); 
+            font-weight: 600;
+        }
+
+        /* SCREEN 4: WARM TEXTS */
+        #screen-warm {
+            background: radial-gradient(circle at 50% 60%, rgba(229, 193, 88, 0.03) 0%, transparent 60%), var(--bg-warm);
+        }
+        .warm-text-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            width: 100%;
+            padding: 20px 0;
+        }
+        .warm-line {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            line-height: 1.4;
+            color: var(--text-muted);
+            transition: color 0.6s ease;
+        }
+        .warm-line.highlight {
+            color: var(--text-light);
+        }
+
+        /* SCREEN 5: MOOD SELECTOR */
+        #screen-mood { background: var(--bg-dark); }
+        .mood-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .mood-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 24px 16px;
+            border-radius: 20px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: center;
+        }
+        .mood-btn:active {
+            background: rgba(255,255,255,0.08);
+            transform: scale(0.97);
+        }
+        
+        /* Inline Mood Overlay Window */
+        .mood-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(13, 13, 13, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .mood-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .mood-card {
+            background: linear-gradient(145deg, rgba(30,28,26,0.7), rgba(15,15,15,0.8));
+            border: 1px solid rgba(229, 193, 88, 0.15);
+            padding: 40px 24px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transform: translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        .mood-overlay.open .mood-card {
+            transform: translateY(0);
+        }
+        .mood-card-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            margin-bottom: 24px;
+        }
+        .mood-card-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            line-height: 1.4;
+            color: var(--text-light);
+            margin-bottom: 36px;
+        }
+        .mood-card-close {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        .mood-card-close:active {
+            border-color: var(--text-muted);
+            color: var(--text-light);
+        }
+
+        /* SCREEN 6: FINALE */
+        #screen-finale {
+            background: radial-gradient(circle at 50% 50%, rgba(229, 193, 88, 0.08) 0%, transparent 60%), #080808;
+            text-align: center;
+            justify-content: space-between;
+            padding-top: 20vh;
+            padding-bottom: 12vh;
+        }
+        .finale-text-group {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+        }
+        .finale-p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            min-height: 40px;
+        }
+        .btn-heart {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-light);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-top: 40px;
+            box-shadow: 0 0 0 rgba(229, 193, 88, 0);
+        }
+        .btn-heart.pulse {
+            animation: subtle-pulse 2s infinite;
+            border-color: rgba(229, 193, 88, 0.3);
+        }
+        .btn-heart.clicked {
+            transform: scale(1.2);
+            background: var(--text-light);
+            color: var(--bg-dark);
+            border-color: var(--text-light);
+            box-shadow: 0 0 40px rgba(225, 193, 88, 0.6);
+        }
+
+        @keyframes subtle-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(229, 193, 88, 0.2); }
+            70% { box-shadow: 0 0 0 15px rgba(229, 193, 88, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(229, 193, 88, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grain-overlay"></div>
+    <canvas id="particles"></canvas>
+
+    <!-- Sound Button -->
+    <button class="sound-toggle" id="soundBtn" aria-label="Включить/выключить звук">
+        <svg id="sound-icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+    </button>
+
+    <!-- SCREEN 1: LOADING -->
+    <div id="screen-loading">
+        <div class="loading-text" id="loading-text">создаём кое-что для одного особенного человека…</div>
+    </div>
+
+    <!-- SCREEN 2: HERO -->
+    <section id="screen-hero">
+        <div class="container fade-in">
+            <h1 class="hero-title">У некоторых людей день рождения длится один день.<br>У тебя — чуть дольше.</h1>
+            <p class="hero-subtitle">маленькое интерактивное путешествие для Ируси</p>
+            <button class="btn-cinematic" id="startBtn">Начать</button>
+        </div>
+    </section>
+
+    <!-- SCREEN 3: DOSSIER (UPDATED FRASES) -->
+    <section id="screen-analysis">
+        <div class="container">
+            <div class="section-tag fade-in">Досье / Ирочка</div>
+            <div class="analysis-grid">
+                <div class="analysis-card fade-in">
+                    <span class="analysis-value">Ты умеешь делать людей спокойнее, даже не замечая этого.</span>
+                </div>
+                <div class="analysis-card fade-in">
+                    <span class="analysis-value">С тобой очень легко молчать.</span>
+                </div>
+                <div class="analysis-card fade-in">
+                    <span class="analysis-value">Некоторые люди ощущаются как временный этап. <br><span class="gold-highlight">Ты — нет.</span></span>
+                </div>
+                <div class="analysis-card fade-in">
+                    <span class="analysis-value">У тебя энергия человека, рядом с которым появляются истории.</span>
+                </div>
+                <div class="analysis-card fade-in">
+                    <span class="analysis-value">Ты делаешь обычные вечера запоминающимися.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCREEN 4: WARM TEXTS -->
+    <section id="screen-warm">
+        <div class="container">
+            <div class="warm-text-layout">
+                <p class="warm-line fade-in">С тобой очень легко говорить, и это редкость.</p>
+                <p class="warm-line fade-in">Ты каким-то образом одновременно хаос и комфорт.</p>
+                <p class="warm-line fade-in">После некоторых разговоров с тобой мысли остаются надолго.</p>
+                <p class="warm-line fade-in">Ты умеешь делать обычные моменты интереснее.</p>
+                <p class="warm-line fade-in">У тебя вайб человека, которого сложно забыть.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCREEN 5: MOOD SELECTOR -->
+    <section id="screen-mood">
+        <div class="container">
+            <div class="section-tag fade-in" style="margin-bottom: 16px;">интерактив</div>
+            <h2 class="serif-font fade-in" style="font-size: 2rem; margin-bottom: 32px; text-align:center;">выбери своё настроение</h2>
+            
+            <div class="mood-grid">
+                <button class="mood-btn fade-in" data-mood="chaos">хаос</button>
+                <button class="mood-btn fade-in" data-mood="talks">по душам</button>
+                <button class="mood-btn fade-in" data-mood="adventure">приключения</button>
+                <button class="mood-btn fade-in" data-mood="italy">итальянское лето</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- MOOD OVERLAY WINDOW -->
+    <div class="mood-overlay" id="moodOverlay">
+        <div class="mood-card">
+            <div class="mood-card-title" id="moodTitle">Настроение</div>
+            <div class="mood-card-text" id="moodText">Текст появится здесь...</div>
+            <button class="mood-card-close" id="moodClose">закрыть</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 6: FINALE -->
+    <section id="screen-finale">
+        <div></div> <!-- spacer -->
+        <div class="container finale-text-group">
+            <p class="finale-p fade-in" data-delay="0">Мне кажется, твой день рождения сегодня закончится не здесь.</p>
+            <p class="finale-p fade-in" data-delay="2000">Иногда лучшие моменты начинаются, когда ты вообще ничего не подозреваешь.</p>
+            <p class="finale-p fade-in" data-delay="4000" style="color: var(--text-light); font-style: italic;">До скорой встречи, Ируся.</p>
+        </div>
+        
+        <div class="container">
+            <button class="btn-heart pulse fade-in" id="heartBtn" aria-label="Сердце">♡</button>
+        </div>
+    </section>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- 1. PRELOADER CONTROLLER ---
+        const loadingPhrases = [
+            "создаём кое-что для одного особенного человека…",
+            "запускаем атмосферу дня рождения…"
+        ];
+        const loadingTextEl = document.getElementById('loading-text');
+        const preloader = document.getElementById('screen-loading');
+
+        setTimeout(() => {
+            loadingTextEl.style.opacity = 0;
+            setTimeout(() => {
+                loadingTextEl.textContent = loadingPhrases[1];
+                loadingTextEl.style.opacity = 1;
+            }, 500);
+        }, 1800);
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                preloader.style.opacity = 0;
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                    document.querySelectorAll('#screen-hero .fade-in').forEach(el => el.classList.add('active'));
+                }, 1000);
+            }, 3800);
+        });
+
+        // --- 2. SMOOTH SCROLL TO SYSTEM ---
+        document.getElementById('startBtn').addEventListener('click', () => {
+            initAudio();
+            document.getElementById('screen-analysis').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // --- 3. INTERSECTION OBSERVER ANIMATIONS ---
+        const observerOptions = {
+            root: null,
+            threshold: 0.25,
+            rootMargin: "0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if(entry.target.id === 'screen-finale') {
+                        const paragraphs = entry.target.querySelectorAll('.finale-p');
+                        paragraphs.forEach(p => {
+                            const delay = p.getAttribute('data-delay') || 0;
+                            setTimeout(() => p.classList.add('active'), delay);
+                        });
+                        setTimeout(() => {
+                            entry.target.querySelector('#heartBtn').classList.add('active');
+                        }, 5500);
+                    } else {
+                        const fadeElements = entry.target.querySelectorAll('.fade-in');
+                        fadeElements.forEach((el, index) => {
+                            setTimeout(() => {
+                                el.classList.add('active');
+                                if(el.classList.contains('warm-line')) el.classList.add('highlight');
+                            }, index * 150);
+                        });
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // --- 4. MOOD INTERACTIVE BLOCK ---
+        const moodData = {
+            chaos: { title: "хаос", text: "90% лучших историй начинаются с фразы «а давай просто…»" },
+            talks: { title: "по душам", text: "Некоторые разговоры с людьми забываются. Некоторые почему-то остаются в голове ночью." },
+            adventure: { title: "приключения", text: "Ты создаёшь ощущение, будто обычный вечер может стать воспоминанием." },
+            italy: { title: "итальянское лето", text: "У некоторых людей энергия не города. А целого маленького путешествия." }
+        };
+
+        const moodOverlay = document.getElementById('moodOverlay');
+        const moodTitle = document.getElementById('moodTitle');
+        const moodText = document.getElementById('moodText');
+
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mood = btn.getAttribute('data-mood');
+                moodTitle.textContent = moodData[mood].title;
+                moodText.textContent = moodData[mood].text;
+                moodOverlay.classList.add('open');
+            });
+        });
+
+        document.getElementById('moodClose').addEventListener('click', () => {
+            moodOverlay.classList.remove('open');
+        });
+        moodOverlay.addEventListener('click', (e) => {
+            if(e.target === moodOverlay) moodOverlay.classList.remove('open');
+        });
+
+        // --- 5. FINALE INTERACTION (PARTICLE BURST) ---
+        const heartBtn = document.getElementById('heartBtn');
+        let finalBurst = false;
+
+        heartBtn.addEventListener('click', () => {
+            heartBtn.classList.remove('pulse');
+            heartBtn.classList.add('clicked');
+            heartBtn.textContent = '♥';
+            finalBurst = true;
+            
+            for(let i=0; i<80; i++) {
+                particlesArray.push(new Particle(window.innerWidth/2, window.innerHeight*0.82, true));
+            }
+        });
+
+        // --- 6. PROCEDURAL CINEMATIC AUDIO (WEB AUDIO API) ---
+        let audioCtx = null;
+        let gainNode = null;
+        let isMuted = false;
+        let notesInterval = null;
+
+        function initAudio() {
+            if (audioCtx) return; 
+            
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); 
+            gainNode.connect(audioCtx.destination);
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(450, audioCtx.currentTime);
+            filter.connect(gainNode);
+
+            const baseNotes = [130.81, 164.81, 196.00, 246.94]; 
+            let currentOscillators = [];
+
+            function playPad() {
+                if (isMuted) return;
+                currentOscillators.forEach(osc => { try{osc.stop()}catch(e){} });
+                currentOscillators = [];
+
+                baseNotes.forEach(freq => {
+                    let osc = audioCtx.createOscillator();
+                    let oscGain = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq + (Math.random()*2 - 1), audioCtx.currentTime); 
+                    
+                    oscGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    oscGain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 2); 
+                    oscGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 7);   
+
+                    osc.connect(oscGain);
+                    oscGain.connect(filter);
+                    osc.start();
+                    currentOscillators.push(osc);
+                });
+            }
+
+            playPad();
+            notesInterval = setInterval(playPad, 6500);
+
+            const soundBtn = document.getElementById('soundBtn');
+            soundBtn.classList.add('visible');
+            
+            soundBtn.addEventListener('click', () => {
+                if(!isMuted) {
+                    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+                    soundBtn.classList.add('muted');
+                    soundBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+                    isMuted = true;
+                } else {
+                    gainNode.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.5);
+                    soundBtn.classList.remove('muted');
+                    soundBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+                    isMuted = false;
+                    playPad();
+                }
+            });
+        }
+
+        // --- 7. LIGHTS & PARTICLES SYSTEM (CANVAS) ---
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, isBurst = false) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height + canvas.height;
+                this.size = isBurst ? (Math.random() * 3 + 1) : (Math.random() * 4 + 1);
+                this.speedX = isBurst ? (Math.random() * 6 - 3) : (Math.random() * 0.4 - 0.2);
+                this.speedY = isBurst ? (Math.random() * -8 - 2) : (Math.random() * -0.6 - 0.2);
+                this.opacity = isBurst ? 1 : Math.random() * 0.5 + 0.1;
+                this.color = `rgba(229, 193, 88, ${this.opacity})`; 
+                this.isBurst = isBurst;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if(this.isBurst) {
+                    this.speedY += 0.1; 
+                    this.opacity -= 0.015;
+                }
+                if (this.y < -10 && !this.isBurst) {
+                    this.y = canvas.height + 10;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.isBurst ? `rgba(229,193,88,${this.opacity})` : this.color;
+                ctx.shadowBlur = this.isBurst ? 12 : 6;
+                ctx.shadowColor = 'rgba(229, 193, 88, 0.5)';
+                ctx.fill();
+                ctx.shadowBlur = 0; 
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 35; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                if (particlesArray[i].isBurst && particlesArray[i].opacity <= 0) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    </script>
+</body>
+</html>
