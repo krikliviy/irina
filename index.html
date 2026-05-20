@@ -179,7 +179,7 @@
             opacity: 0.9;
         }
 
-        /* SCREEN 3: CARDS BLOCK (UPDATED) */
+        /* SCREEN 3: MINIMAL CARDS BLOCK */
         #screen-analysis { background: var(--bg-dark); }
         .section-tag {
             font-size: 0.8rem;
@@ -193,14 +193,13 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            margin-bottom: 60px;
         }
         .analysis-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            padding: 24px 20px;
+            padding: 28px 24px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -221,17 +220,17 @@
             font-style: italic;
         }
 
-        /* NEW CINEMATIC TEXT BLOCK */
-        .cinematic-thought-block {
-            width: 100%;
+        /* SCREEN 3.5: CINEMATIC PAUSE SECTION */
+        #screen-cinematic-thought {
+            background: var(--bg-dark);
             text-align: center;
-            padding: 40px 0 20px 0;
-            margin-top: 20px;
+            padding-top: 10vh;
+            padding-bottom: 10vh;
         }
         .cinematic-thought-text {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 1.7rem;
-            line-height: 1.5;
+            font-size: 1.75rem;
+            line-height: 1.6;
             color: var(--text-light);
             letter-spacing: 0.5px;
         }
@@ -258,7 +257,7 @@
             color: var(--text-light);
         }
 
-        /* SCREEN 5: MOOD SELECTOR (LITTLE MOMENTS) */
+        /* SCREEN 5: LITTLE MOMENTS (INTERACTIVE) */
         #screen-mood { background: var(--bg-dark); }
         .moments-subtitle { 
             color: var(--text-muted); 
@@ -451,10 +450,12 @@
                     <span class="analysis-value">«Ты хороший человек, который умеет поддержать и быть рядом...»</span>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="cinematic-thought-block">
-                <p class="cinematic-thought-text fade-in">Просто не теряй себя —<br>оставайся такой, какая ты есть.</p>
-            </div>
+    <section id="screen-cinematic-thought">
+        <div class="container">
+            <p class="cinematic-thought-text fade-in">Просто не теряй себя —<br>оставайся такой, какая ты есть.</p>
         </div>
     </section>
 
@@ -585,7 +586,6 @@
         const moodTitle = document.getElementById('moodTitle');
         const moodText = document.getElementById('moodText');
 
-        // Reuse modal function for both section 3 cards and section 5 buttons
         function showModal(title, text) {
             moodTitle.textContent = title;
             moodText.textContent = text;
