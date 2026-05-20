@@ -220,21 +220,6 @@
             font-style: italic;
         }
 
-        /* SCREEN 3.5: CINEMATIC PAUSE SECTION */
-        #screen-cinematic-thought {
-            background: var(--bg-dark);
-            text-align: center;
-            padding-top: 10vh;
-            padding-bottom: 10vh;
-        }
-        .cinematic-thought-text {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.75rem;
-            line-height: 1.6;
-            color: var(--text-light);
-            letter-spacing: 0.5px;
-        }
-
         /* SCREEN 4: WARM TEXTS */
         #screen-warm {
             background: radial-gradient(circle at 50% 60%, rgba(229, 193, 88, 0.03) 0%, transparent 60%), var(--bg-warm);
@@ -257,42 +242,22 @@
             color: var(--text-light);
         }
 
-        /* SCREEN 5: LITTLE MOMENTS (INTERACTIVE) */
-        #screen-mood { background: var(--bg-dark); }
-        .moments-subtitle { 
-            color: var(--text-muted); 
-            font-size: 1.1rem; 
-            font-family: 'Cormorant Garamond', serif; 
-            margin-bottom: 40px; 
-            font-style: italic;
-        }
-        .mood-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .mood-btn {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 24px 16px;
-            border-radius: 20px;
-            color: var(--text-light);
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        /* SCREEN 5: PENULTIMATE CINEMATIC PAUSE SECTION (MOVED HERE) */
+        #screen-cinematic-thought {
+            background: var(--bg-dark);
             text-align: center;
+            padding-top: 12vh;
+            padding-bottom: 12vh;
         }
-        .mood-btn:active {
-            background: rgba(255,255,255,0.08);
-            transform: scale(0.97);
+        .cinematic-thought-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.75rem;
+            line-height: 1.6;
+            color: var(--text-light);
+            letter-spacing: 0.5px;
         }
-        
-        /* Inline Mood Overlay Window */
+
+        /* MOOD OVERLAY WINDOW (FOR CARDS CLICKS) */
         .mood-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -453,12 +418,6 @@
         </div>
     </section>
 
-    <section id="screen-cinematic-thought">
-        <div class="container">
-            <p class="cinematic-thought-text fade-in">Просто не теряй себя —<br>оставайся такой, какая ты есть.</p>
-        </div>
-    </section>
-
     <section id="screen-warm">
         <div class="container">
             <div class="warm-text-layout">
@@ -471,23 +430,15 @@
         </div>
     </section>
 
-    <section id="screen-mood">
+    <section id="screen-cinematic-thought">
         <div class="container">
-            <h2 class="serif-font fade-in" style="font-size: 2.2rem; margin-bottom: 10px;">маленькие моменты</h2>
-            <p class="moments-subtitle fade-in">Некоторые вещи почему-то остаются в памяти.</p>
-            
-            <div class="mood-grid">
-                <button class="mood-btn fade-in" data-mood="chaos">разговоры</button>
-                <button class="mood-btn fade-in" data-mood="talks">вечера</button>
-                <button class="mood-btn fade-in" data-mood="adventure">люди</button>
-                <button class="mood-btn fade-in" data-mood="italy">энергия</button>
-            </div>
+            <p class="cinematic-thought-text fade-in">Просто не теряй себя —<br>оставайся такой, какая ты есть.</p>
         </div>
     </section>
 
     <div class="mood-overlay" id="moodOverlay">
         <div class="mood-card">
-            <div class="mood-card-title" id="moodTitle">Настроение</div>
+            <div class="mood-card-title" id="moodTitle">Мысли</div>
             <div class="mood-card-text" id="moodText">Текст появится здесь...</div>
             <button class="mood-card-close" id="moodClose">закрыть</button>
         </div>
@@ -574,14 +525,7 @@
             observer.observe(section);
         });
 
-        // --- 4. MOOD INTERACTIVE BLOCK & CARD OVERLAY ---
-        const moodData = {
-            chaos: { title: "разговоры", text: "«Есть разговоры, после которых не хочется включать музыку.»" },
-            talks: { title: "вечера", text: "«Иногда самые обычные вечера почему-то остаются в памяти дольше всего.»" },
-            adventure: { title: "люди", text: "«Есть люди, рядом с которыми всё ощущается чуть легче.»" },
-            italy: { title: "энергия", text: "«У тебя вайб человека, из-за которого появляются спонтанные планы.»" }
-        };
-
+        // --- 4. CARD OVERLAY FUNCTION ---
         const moodOverlay = document.getElementById('moodOverlay');
         const moodTitle = document.getElementById('moodTitle');
         const moodText = document.getElementById('moodText');
@@ -591,13 +535,6 @@
             moodText.textContent = text;
             moodOverlay.classList.add('open');
         }
-
-        document.querySelectorAll('.mood-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const mood = btn.getAttribute('data-mood');
-                showModal(moodData[mood].title, moodData[mood].text);
-            });
-        });
 
         document.getElementById('moodClose').addEventListener('click', () => {
             moodOverlay.classList.remove('open');
